@@ -1,6 +1,9 @@
 // ILLUMINUS version 2: a program that calls genotypes from the Illumina platform
 // Copyright (c) 2007 Genome Research Ltd and University of Oxford
 // Authors: Taane Clark <tc5@sanger.ac.uk, tgc@well.ox.ac.uk>, YY Teo <yy.teo@well.ox.ac.uk>
+//
+// $Id$
+//
 
 #define PI 3.141592654
 #define min(a,b) ((a) <= (b) ? (a) : (b))
@@ -130,28 +133,19 @@ class data
   ~data()
     {
     }
-  
-  void split_chars ( char *s , vector <char*> &v ) {
-		char *c ;
-		v.clear() ;
-		if ( *s > 13 ) v.push_back ( s ) ;
-		for ( c = s ; *c ; c++ ) {
-			if ( *c == 10 || *c == 13 ) {
-				*c = 0 ;
-				break ;
-			}
-			
-			if ( *c != 32 && *c != 9 ) continue ;
 
-			*c++ = 0 ;
-			while ( *c == 32 || *c == 9 ) c++ ;
-			if ( !*c ) return ;
-			v.push_back ( c ) ;
-			c-- ;
+//
+// Split line into an array of words
+//
+void split_chars(char *s, vector <char*> &v) {
+	char *p = strtok(s,"\t\n ");
+	v.clear();
+	while (p) {
+		v.push_back(p);
+		p = strtok(NULL,"\t\n ");
+	}
+}
 
-		}
-  }
-  
   data(char *infile, char *xfile, int ll, int uu) {
 		
 		int total_number_of_snps = 0 ;
