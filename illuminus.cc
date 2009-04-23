@@ -18,6 +18,10 @@
 // -w whole genome amplified data
 ////////////////////////////////////////////////////////////////////////
 
+//
+// $Id$
+//
+
 using namespace std;
 
 #include <iostream>
@@ -38,6 +42,7 @@ using namespace std;
 #include "time.h"
 #include "illuminus.h"
 
+int version = 201;
 
 int main(int argc, char *argv[]) {
 
@@ -75,6 +80,9 @@ int main(int argc, char *argv[]) {
 				case 'p' : probs = true; break ; // write probs of calls to outfile_p
 				case 'w' : wga = true; break ; // wga
 				case 'a' : pert = true;  break ; // perturbation analysis
+				case 'v' : cout << endl << "Illuminus version " << version/100.0 << endl 
+				                << "Compiled: " << __DATE__ << endl; 
+				           exit(0);
 				case 's' : { 
 					low = atoi(argv[++i]);
 					upp = atoi(argv[++i]); /// range of snps
