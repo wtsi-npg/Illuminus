@@ -877,9 +877,16 @@ void split_chars(char *s, vector <char*> &v) {
     }
     
     totp = pa + pb;
-    lambda[0] = pa * pa / totp / totp;
-    lambda[1] = 2 * pa * pb / totp / totp;
-    lambda[2] = pb * pb / totp / totp;
+
+	if (chrX) {
+		lambda[0] = 1.0;
+		lambda[1] = 1.0;
+		lambda[2] = 1.0;
+	} else {
+		lambda[0] = pa * pa / totp / totp;
+		lambda[1] = 2 * pa * pb / totp / totp;
+		lambda[2] = pb * pb / totp / totp;
+	}
     
     maf = pa / totp; 
     
