@@ -191,6 +191,10 @@ void split_chars(char *s, vector <char*> &v) {
 		fclose ( in_file ) ;
 
 		if ( upp == -1 ) upp = total_number_of_snps ;
+		if ( upp > total_number_of_snps) {
+			cout << "Warning: not all SNPs found; expecting at least " << upp << ", found " << total_number_of_snps << endl ;
+			upp = total_number_of_snps ;
+		}
 		cout << "Total " << total_number_of_snps << " SNPs in file, " << low << " - " << upp << " processed." << endl ;
 		n_snp = upp - low + 1;
 
