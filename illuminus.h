@@ -431,12 +431,12 @@ void split_chars(char *s, vector <char*> &v) {
     // initialise prs_mat and sigma_mat//
    
     minmaxvec ( contrast , n_ind , min_vec , max_vec ) ;
-       
+  
     prs_mat[3][1] = 0.5 * ( max_vec + min_vec ); 
     prs_mat[4][1] = 0.5 * ( max_vec + min_vec ); 
     prs_mat[3][2] =  0.9 *  max_vec;
     prs_mat[4][0] =  0.9 *  min_vec;
-    
+
     for(int j = 0; j < 2; j++)
       {
 	for(int  i = 0; i < 3; i++)  { sigma_mat[j+3][i] = 0.05 * (max_vec - min_vec) ; }
@@ -543,14 +543,15 @@ void split_chars(char *s, vector <char*> &v) {
       pAB = dAB / pnorm2;
       pBB = dBB /  pnorm3;
       
+      if(chrX && sex[j] == 1) prob[1] = 0.0; 
+      if(chrX && sex[j] == 1) pAB = 0;
+
       sump = pAA + pAB + pBB + pNULL;
       
       prob[0] = pAA / sump;
       prob[1] = pAB / sump;
       prob[2] = pBB / sump;;
       prob[3] = pNULL / sump;
-      
-      if(chrX && sex[j] == 1) prob[1] = 0.0; 
       
       pos = max_element( prob.begin() , prob.end() );
       gc = 4;
@@ -751,14 +752,14 @@ void split_chars(char *s, vector <char*> &v) {
       pAB *= lambda[1];
       pBB *= lambda[2];
       
+      if(chrX && sex[j] == 1) prob[1] = 0.0; 
+      if(chrX && sex[j] == 1) pAB = 0;
       sump = pAA + pAB + pBB + pNULL;
       
       prob[0] = pAA / sump;
       prob[1] = pAB / sump;
       prob[2] = pBB / sump;
       prob[3] = pNULL / sump;
-      
-      if(chrX && sex[j] == 1) prob[1] = 0.0;
       
       pos = max_element( prob.begin(), prob.end() );
       
