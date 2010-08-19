@@ -35,6 +35,7 @@ using namespace std;
 #include <map> 
 #include <iterator> 
 #include <algorithm> 
+#include <bitset> 
 #include <numeric> 
 #include <functional> 
 #include <cmath> 
@@ -49,7 +50,7 @@ int main(int argc, char *argv[]) {
   int i, seed1, seed2, rs = 1, niter = 100, low=-1 , upp= -1;
   char *infile = NULL, *outfile = NULL, *xfile = NULL, *yfile = NULL, *mfile = NULL;
   double thres = 0.95000001; 
-  bool wga = false, pert = false, calls = false, probs = false, pr = false;
+  bool wga = false, pert = false, bed = false, calls = false, probs = false, pr = false;
   data dat;
   
   srand(time(NULL));
@@ -78,6 +79,7 @@ int main(int argc, char *argv[]) {
 				case 't' : thres = atof(argv[++i]); break ; // trimming threshold for calling probabilities 
 				case 'c' : calls = true; break ; // write calls to file outfile_c
 				case 'p' : probs = true; break ; // write probs of calls to outfile_p
+				case 'b' : bed = true; break ; // write calls to plink bed
 				case 'w' : wga = true; break ; // wga
 				case 'a' : pert = true;  break ; // perturbation analysis
 				case 'v' : cout << endl << "Illuminus version " << version/100.0 << endl 
@@ -112,6 +114,7 @@ int main(int argc, char *argv[]) {
   dat.thres = thres;
   dat.niter = niter;
   dat.calls = calls;
+  dat.bed = bed;
   dat.probs = probs;
   dat.wga = wga;
   dat.pert = pert;

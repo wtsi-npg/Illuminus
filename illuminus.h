@@ -88,7 +88,7 @@ class data
   vector<double> contrast;
   vector<int> missing;
   vector<double> pert_score;
-  bool print, calls, wga, probs, pert, not_in_pert;
+  bool print, calls, bed, wga, probs, pert, not_in_pert;
   char *outfile; 
   
   // the calls 
@@ -115,7 +115,7 @@ class data
   ColumnVector tmpvec;
   vector<int> sex; // sex of individuals (1 = male, 0 = female)
   bool chrX; // flag for chrX SNPs
-  vector<string> rs_id, illum_id, alleleA, alleleB;
+  vector<string> rs_id, illum_id, alleleA, alleleB, samples;
   vector<int> bppos;
   vector<int> N;
   Matrix tmpmat;
@@ -165,6 +165,10 @@ void split_chars(char *s, vector <char*> &v) {
 		split_chars ( dummy , vc ) ;
 		n_ind = ( vc.size() - 3 ) / 2 ;
 		cout << n_ind << " individuals" << endl ;
+		for ( int a = 3 ; a < vc.size() ; a += 2 ) {
+                    string s = vc[a];
+                    samples.push_back(s.substr(0, s.length() - 1));
+                }
 		
 		// Read data
 		while ( !feof ( in_file ) && ( upp == -1 || total_number_of_snps <= upp ) ) {
@@ -273,6 +277,7 @@ void split_chars(char *s, vector <char*> &v) {
     
     if(calls) output_illum_calls();
     if(probs) output_illum_probs();
+    if(bed) output_plink_bed();
     
     cout << "finished" << endl;
   }
@@ -328,6 +333,73 @@ void split_chars(char *s, vector <char*> &v) {
     ofile.close();
     
   }
+
+  void output_plink_bed()
+  {
+    ofstream file;
+    string fn;
+    int i, j;
+    int bytes_per_snp;
+    bitset<8> gt4 = 0;
+
+    cout << "writing bed" << flush << endl;
+
+    fn = outfile;
+    fn.append(".fam");
+    file.open(fn.c_str());
+    // no sample information:
+    // repeat sample ID, 0 for parents, -9 for gender/phenotype
+    for (i = 0; i < samples.size(); i++)
+        file << samples[i] << "\t" << samples[i] << "\t0\t0\t-9\t-9" << endl;
+    file.close();
+
+    fn = outfile;
+    fn.append(".bim");
+    file.open(fn.c_str());
+    // only snp position => 0 for chromosome and genetic distance
+    // allele1 stores allele A/B (allele2 isn't used...)
+    for (i = 0; i < n_snp; i++)
+        file << "0\t" << dat[i].rs << "\t0\t" << dat[i].id << "\t" << dat[i].allele1.substr(0, 1) << "\t" << dat[i].allele1.substr(1, 1) << endl;
+    file.close();
+
+    fn = outfile;
+    fn.append(".bed");
+    file.open(fn.c_str(), ios::binary);
+    // NB header for plink 1.07:
+    // magic number (two bytes) + '1' for snp-major format
+    // See http://pngu.mgh.harvard.edu/~purcell/plink/binary.shtml
+    char header[3] = {108, 27, 1};
+    file.write(header, 3);
+
+    // output binary data
+    // one byte for 1-4 samples, two for 5-8, etc
+    bytes_per_snp = (3 + samples.size()) / 4;
+    for(i = 0; i < n_snp; i++) {
+        int bit = 0; // next bit in bitfield
+        for (j = 0; j < samples.size(); j++) {
+            switch(calls_all_snps[i][j]) {
+                case 1: gt4.set(bit++, 0); gt4.set(bit++, 0); break;
+                case 2: gt4.set(bit++, 0); gt4.set(bit++, 1); break;
+                case 3: gt4.set(bit++, 1); gt4.set(bit++, 1); break;
+                case 4: gt4.set(bit++, 1); gt4.set(bit++, 0); break;
+            }
+            if (bit == 8) {
+                // end of byte - write and reset
+                // gt4 can only be one byte
+                char c = (char)gt4.to_ulong();
+                file.write(&c, 1);
+                bit = 0;
+                gt4 = 0;
+            }
+        }
+        if (samples.size() % 4) {
+            // samples indivisible by 4 => write final byte
+            char c = (char)gt4.to_ulong();
+            file.write(&c, 1);
+        }
+    }
+    file.close();
+  }
   
   /////////////////////////////////////////  
   /////////////////////////////////////////
@@ -359,7 +431,7 @@ void split_chars(char *s, vector <char*> &v) {
 	  iter++;
 	}
     
-	if(calls) calls_all_snps.push_back(ini_call); 
+	if(calls || bed) calls_all_snps.push_back(ini_call); 
 	if(probs) calls_all_probs.push_back(call_probs);	
 	if(pert) perturbation(); 
       }
