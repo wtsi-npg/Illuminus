@@ -263,6 +263,8 @@ void split_chars(char *s, vector <char*> &v) {
   
   void illuminus() {
 
+    vector<string> failed_snps; // those which are caught be an exception
+
     if(pert) {
       pert_call.resize(n_ind);
       pert_score.resize(n_snp);
@@ -271,13 +273,21 @@ void split_chars(char *s, vector <char*> &v) {
     for(int i = 0; i < n_snp; i++) {
       cur_snp = i;
       if ( (i+1) % 100 == 0 ) cout << endl << "SNP " << i+1 << " " << flush;
-      illum();
+      try {
+        illum();
+      } catch (SingularException e) {
+        cout << "failed calling snp " << i+1 << " " << dat[i].rs << endl;
+        failed_snps.push_back(dat[i].rs);
+      }
     }
-    cout << endl;
+    // cout << endl;
     
     if(calls) output_illum_calls();
     if(probs) output_illum_probs();
     if(bed) output_plink_bed();
+
+    for (int i = 0; i < failed_snps.size(); i++)
+        cout << "Failed to cluster SNP " << failed_snps[i] << endl;
     
     cout << "finished" << endl;
   }
