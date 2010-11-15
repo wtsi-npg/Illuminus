@@ -146,6 +146,20 @@ void split_chars(char *s, vector <char*> &v) {
 	}
 }
 
+/*
+ * extract value from string
+ * return -1 if not a valid number (e.g. NaN, inf)
+ * (sample treated as missing unless at least one of x or y positive)
+*/
+double valid_intensity(char *s)
+{
+    stringstream str(s);
+    double v;
+    str >> v;
+    if (! str.fail() && str.eof()) return v;
+    return -1;
+}
+
   data(char *infile, char *xfile, int ll, int uu) {
 		
 		int total_number_of_snps = 0 ;
@@ -185,8 +199,10 @@ void split_chars(char *s, vector <char*> &v) {
 			tmpsnp.allele1 = vc[2] ;
 			tmpsnp.vec.clear();
 			for ( int a = 3 ; a < vc.size() ; a += 2 ) {
-				tmpvec(1) = ( strcmp ( vc[a] , "NaN" ) == 0 ) ? -1.001 : atof ( vc[a] ) ;
-				tmpvec(2) = ( strcmp ( vc[a+1] , "NaN" ) == 0 ) ? -1.001 : atof ( vc[a+1] ) ;
+                                double v = valid_intensity(vc[a]);
+                                tmpvec(1) = v;
+                                v = valid_intensity(vc[a+1]);
+                                tmpvec(2) = v;
 				tmpsnp.vec.push_back(tmpvec);
 			}
 			if ( tmpsnp.vec.size() != n_ind ) cout << tmpsnp.vec.size() ;
