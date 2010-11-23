@@ -294,17 +294,21 @@ double valid_intensity(char *s)
       } catch (SingularException e) {
         cout << "failed calling snp " << i+1 << " " << dat[i].rs << endl;
         failed_snps.push_back(dat[i].rs);
+        // ? Do we want to insert 'no calls'
       }
     }
     // cout << endl;
+
+    // Report those which were caught above
+    for (int i = 0; i < failed_snps.size(); i++) {
+        cout << "Failed to cluster SNP " << failed_snps[i] << endl;
+        n_snp--;
+    }
     
     if(calls) output_illum_calls();
     if(probs) output_illum_probs();
     if(bed) output_plink_bed();
 
-    for (int i = 0; i < failed_snps.size(); i++)
-        cout << "Failed to cluster SNP " << failed_snps[i] << endl;
-    
     cout << "finished" << endl;
   }
   
