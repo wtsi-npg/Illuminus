@@ -16,6 +16,7 @@
 #include <string>
 #include <iomanip>
 #include <string.h>
+#include <plink_binary.h>
 #include "./other_libraries/newmat11/newmatio.h"
 #include "./other_libraries/newmat11/newmatap.h"
 
@@ -434,7 +435,7 @@ double valid_intensity(char *s)
             }
         }
         if (samples.size() % 4) {
-            // samples indivisible by 4 => write final byte
+            // samples not indivisible by 4 => write final byte
             char c = (char)gt4.to_ulong();
             file.write(&c, 1);
         }
