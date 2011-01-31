@@ -1,5 +1,4 @@
-LIBS = -L/usr/lib64/ -I/usr/include/ -Lother_libraries/rng/
-LNEWMAT = -L./other_libraries/newmat11/ -I./other_libraries/newmat11/
+LIBS = -L./other_libraries/rng/ -L./other_libraries/newmat11/ 
 CFLAGS = -O3
 CXXFLAGS = -O3 -Wno-deprecated
 
@@ -9,9 +8,9 @@ RNG := $(patsubst %.c,%.o,$(wildcard other_libraries/rng/*.c))
 NM := $(patsubst %.cpp,%.o,$(wildcard other_libraries/newmat11/*.cpp))
 
 illuminus: illuminus.o librng libnewmat 
-	$(CXX) illuminus.o  -o illuminus -lm -lstdc++ -lnewmat -lrng $(LNEWMAT) $(LIBS)
+	$(CXX) illuminus.o  -o illuminus -lm -lstdc++ -lnewmat -lrng $(LIBS)
 
-illuminus.o : illuminus.cc illuminus.h librng libnewmat
+illuminus.o: illuminus.cc illuminus.h
 
 librng : $(RNG) 
 	/usr/bin/ar rc other_libraries/rng/librng.a $(RNG)
