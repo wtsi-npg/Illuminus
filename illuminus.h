@@ -16,7 +16,6 @@
 #include <string>
 #include <iomanip>
 #include <string.h>
-#include <plink_binary.h>
 #include "./other_libraries/newmat11/newmatio.h"
 #include "./other_libraries/newmat11/newmatap.h"
 
