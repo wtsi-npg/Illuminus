@@ -12,8 +12,10 @@
 
 #define READ_CHAR_BUFFER (1024*1024*7)
 
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <string>
+#include <iomanip>
+#include <string.h>
 #include "./other_libraries/newmat11/newmatio.h"
 #include "./other_libraries/newmat11/newmatap.h"
 
@@ -292,17 +294,26 @@ double valid_intensity(char *s)
       try {
         illum();
       } catch (SingularException e) {
-        cout << "failed calling snp " << i+1 << " " << dat[i].rs << endl;
         failed_snps.push_back(dat[i].rs);
-        // ? Do we want to insert 'no calls'
+        // fake some no calls
+        if(calls) {
+            for(int k = 0; k < n_ind; k++) ini_call[k] = 4;
+            calls_all_snps.push_back(ini_call);
+        }
+        if(probs) {
+            for(int k=0; k < (4*n_ind); k++) {
+                if ((k+1) % 4 == 0) call_probs[k]=1.0;
+                else call_probs[k]=0.0;
+            }
+            calls_all_probs.push_back(call_probs);
+        }
+        if(pert) pert_score.push_back(1.0);
       }
     }
-    // cout << endl;
 
     // Report those which were caught above
     for (int i = 0; i < failed_snps.size(); i++) {
         cout << "Failed to cluster SNP " << failed_snps[i] << endl;
-        n_snp--;
     }
     
     if(calls) output_illum_calls();
