@@ -16,6 +16,7 @@
 #include <string>
 #include <iomanip>
 #include <string.h>
+#include "plink_binary.h"
 #include "./other_libraries/newmat11/newmatio.h"
 #include "./other_libraries/newmat11/newmatap.h"
 
@@ -51,7 +52,7 @@ map<double, vector<int>, greater<double> >::iterator rmultinom(map<double, vecto
 class snp 
 {
  public:
-  double coord;
+  int coord;
   string id;
   string rs;
   string allele1;
@@ -377,69 +378,30 @@ double valid_intensity(char *s)
 
   void output_plink_bed()
   {
-    ofstream file;
-    string fn;
-    int i, j;
-    int bytes_per_snp;
-    bitset<8> gt4 = 0;
-
     cout << "writing bed" << flush << endl;
 
-    fn = outfile;
-    fn.append(".fam");
-    file.open(fn.c_str());
-    // no sample information:
-    // repeat sample ID, 0 for parents, -9 for gender/phenotype
-    for (i = 0; i < samples.size(); i++)
-        file << samples[i] << "\t" << samples[i] << "\t0\t0\t-9\t-9" << endl;
-    file.close();
+    plink_binary *pb = new plink_binary();
+    pb->open(outfile, 1);
+    pb->missing_genotype = '0';
 
-    fn = outfile;
-    fn.append(".bim");
-    file.open(fn.c_str());
-    // only snp position => 0 for chromosome and genetic distance
-    // allele1 stores allele A/B (allele2 isn't used...)
-    for (i = 0; i < n_snp; i++)
-        file << "0\t" << dat[i].rs << "\t0\t" << dat[i].id << "\t" << dat[i].allele1.substr(0, 1) << "\t" << dat[i].allele1.substr(1, 1) << endl;
-    file.close();
-
-    fn = outfile;
-    fn.append(".bed");
-    file.open(fn.c_str(), ios::binary);
-    // NB header for plink 1.07:
-    // magic number (two bytes) + '1' for snp-major format
-    // See http://pngu.mgh.harvard.edu/~purcell/plink/binary.shtml
-    char header[3] = {108, 27, 1};
-    file.write(header, 3);
-
-    // output binary data
-    // one byte for 1-4 samples, two for 5-8, etc
-    bytes_per_snp = (3 + samples.size()) / 4;
-    for(i = 0; i < n_snp; i++) {
-        int bit = 0; // next bit in bitfield
-        for (j = 0; j < samples.size(); j++) {
-            switch(calls_all_snps[i][j]) {
-                case 1: gt4.set(bit++, 0); gt4.set(bit++, 0); break;
-                case 2: gt4.set(bit++, 0); gt4.set(bit++, 1); break;
-                case 3: gt4.set(bit++, 1); gt4.set(bit++, 1); break;
-                case 4: gt4.set(bit++, 1); gt4.set(bit++, 0); break;
-            }
-            if (bit == 8) {
-                // end of byte - write and reset
-                // gt4 can only be one byte
-                char c = (char)gt4.to_ulong();
-                file.write(&c, 1);
-                bit = 0;
-                gt4 = 0;
-            }
-        }
-        if (samples.size() % 4) {
-            // samples not indivisible by 4 => write final byte
-            char c = (char)gt4.to_ulong();
-            file.write(&c, 1);
-        }
+    for (int i = 0; i < samples.size(); i++) {
+        gftools::individual ind;
+        ind.name = samples[i];
+        pb->individuals.push_back(ind);
     }
-    file.close();
+
+    for (int i = 0; i < n_snp; i++) {
+        gftools::snp snp;
+        snp.name = dat[i].rs;
+        snp.allele_a = dat[i].allele1.substr(0, 1);
+        snp.allele_b = dat[i].allele1.substr(1, 1);
+        snp.physical_position = dat[i].coord;
+        // pb uses same encoding; 4 still treated as a no call
+        pb->write_snp(snp, calls_all_snps[i]);
+    }
+
+    pb->close();
+    delete pb;
   }
   
   /////////////////////////////////////////  
