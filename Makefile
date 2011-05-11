@@ -1,4 +1,4 @@
-LIBS = -L./other_libraries/rng/ -L./other_libraries/newmat11/ 
+LIBS = -L./other_libraries/rng/ -L./other_libraries/newmat11/ -L/software/varinf/gftools/lib -lplinkbin
 CFLAGS = -O3
 CXXFLAGS = -O3 -Wno-deprecated
 
@@ -11,6 +11,7 @@ illuminus: illuminus.o librng libnewmat
 	$(CXX) illuminus.o  -o illuminus -lm -lstdc++ -lnewmat -lrng $(LIBS)
 
 illuminus.o: illuminus.cc illuminus.h
+	/usr/bin/g++ -O3 -Wno-deprecated -I/software/varinf/gftools/include -c -o illuminus.o illuminus.cc
 
 librng : $(RNG) 
 	/usr/bin/ar rc other_libraries/rng/librng.a $(RNG)
