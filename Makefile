@@ -1,24 +1,34 @@
-LIBS = -L./other_libraries/rng/ -L./other_libraries/newmat11/ -L/software/varinf/gftools/lib -lplinkbin
-CFLAGS = -O3
-CXXFLAGS = -O3 -Wno-deprecated
 
-CXX = /usr/bin/g++
+EXECUTABLES = illuminus
+TARGETS = $(EXECUTABLES)
+INCLUDES = illuminus.h
 
 RNG := $(patsubst %.c,%.o,$(wildcard other_libraries/rng/*.c))
 NM := $(patsubst %.cpp,%.o,$(wildcard other_libraries/newmat11/*.cpp))
 
-illuminus: illuminus.o librng libnewmat 
-	$(CXX) illuminus.o  -o illuminus -lm -lstdc++ -lnewmat -lrng $(LIBS)
+AR = ar
+CXX = g++
+CXXFLAGS = -O3 -Wno-deprecated -I./
+LIBPATH = -L./other_libraries/rng/ -L./other_libraries/newmat11/ -L./
+LDFLAGS = -lm -lstdc++ -lnewmat -lrng -lplinkbin $(LIBPATH)
+
+.PHONY: test
+
+all: $(EXECUTABLES)
+
+illuminus: illuminus.o librng.a libnewmat.a
+	$(CXX) $< $(LDFLAGS) -o $@
 
 illuminus.o: illuminus.cc illuminus.h
-	/usr/bin/g++ -O3 -Wno-deprecated -I/software/varinf/gftools/include -c -o illuminus.o illuminus.cc
+	$(CXX) $(CXXFLAGS) -c -o $@ illuminus.cc
 
-librng : $(RNG) 
-	/usr/bin/ar rc other_libraries/rng/librng.a $(RNG)
+librng.a : $(RNG)
+	$(AR) rc $@ $^
 
-libnewmat : $(NM) 
-	/usr/bin/ar rc other_libraries/newmat11/libnewmat.a $(NM)
+libnewmat.a : $(NM)
+	$(AR) rc $@ $^
 
 clean : 
-	rm -f *.o ./other_libraries/rng/*.o ./other_libraries/rng/*.a ./other_libraries/newmat11/*.o ./other_libraries/newmat11/*.a; rm illuminus
+	rm -f *.o ./other_libraries/rng/*.o ./other_libraries/newmat11/*.o *.a
+	rm -f $(EXECUTABLES)
 				
