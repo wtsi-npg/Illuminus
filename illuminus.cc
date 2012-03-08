@@ -44,7 +44,8 @@ using namespace std;
 #include "time.h"
 #include "illuminus.h"
 
-int version = 201;
+// kdj
+int version = 202;
 
 int main(int argc, char *argv[]) {
 
@@ -83,9 +84,10 @@ int main(int argc, char *argv[]) {
 				case 'b' : bed = true; break ; // write calls to plink bed
 				case 'w' : wga = true; break ; // wga
 				case 'a' : pert = true;  break ; // perturbation analysis
-				case 'v' : cout << endl << "Illuminus version " << version/100.0 << endl 
-				                << "Compiled: " << __DATE__ << endl; 
-				           exit(0);
+                case 'v' : cout << endl << "Illuminus version " << version/100.0
+                                << " (BED output support)" << endl
+                                << "Compiled: " << __DATE__ << endl;
+                    exit(0);
 				case 's' : { 
 					low = atoi(argv[++i]);
 					upp = atoi(argv[++i]); /// range of snps
@@ -95,9 +97,15 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if( outfile == NULL or (infile == NULL and xfile == NULL and yfile == NULL and mfile == NULL)) { 
-    cout << "Need to specify both an input and an output file" << endl; exit(1); }        
-  if( calls == false and probs == false) { cout << "Need to specify -c and / or -p" << endl; exit(1); }     
+  // kdj
+  if (outfile == NULL or (infile == NULL and xfile == NULL and yfile == NULL and mfile == NULL)) {
+    cerr << "Need to specify both an input and an output file" << endl;
+    exit(1);
+  }
+  if (calls == false and bed == false and probs == false) {
+    cerr << "Need to specify at least one of -c (text calls), -b (BED calls) or -p (probabilities)" << endl;
+    exit(1);
+  }
   
   /////////////////////////////////
   // Set random number generator //

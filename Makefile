@@ -7,8 +7,9 @@ NM := $(patsubst %.cpp,%.o,$(wildcard other_libraries/newmat11/*.cpp))
 
 AR = ar
 CXX = g++
-CXXFLAGS = -O3 -Wno-deprecated -I./
-LIBPATH = -L./other_libraries/rng/ -L./other_libraries/newmat11/ -L./
+CXXFLAGS = -O3 -Wno-deprecated -I./ -I$(GFTOOLS)/include
+GFTOOLS = /usr/local/lib/gftools
+LIBPATH = -L./ -L$(GFTOOLS)/lib
 LDFLAGS = $(LIBPATH) -lm -lnewmat -lrng -lplinkbin
 
 .PHONY: test
