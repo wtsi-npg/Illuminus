@@ -45,7 +45,7 @@ using namespace std;
 #include "illuminus.h"
 
 // kdj
-int version = 202;
+int version = 203;
 
 int main(int argc, char *argv[]) {
 

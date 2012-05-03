@@ -443,7 +443,7 @@ double valid_intensity(char *s)
 
     else
       {
-	if(calls) 
+    if(calls || bed) // kdj - caused buffer overrun when writing bed format
 	  {
 	    for(int k = 0; k < n_ind; k++) ini_call[k] = 4;
 	    calls_all_snps.push_back(ini_call);
