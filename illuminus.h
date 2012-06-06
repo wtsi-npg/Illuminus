@@ -296,6 +296,7 @@ double valid_intensity(char *s)
         illum();
       } catch (SingularException e) {
         failed_snps.push_back(dat[i].rs);
+
         // fake some no calls
         if(calls) {
             for(int k = 0; k < n_ind; k++) ini_call[k] = 4;
@@ -309,6 +310,11 @@ double valid_intensity(char *s)
             calls_all_probs.push_back(call_probs);
         }
         if(pert) pert_score.push_back(1.0);
+        // kdj - We need to apply this no-call hack for BED file too
+        if(bed) {
+          for(int k = 0; k < n_ind; k++) ini_call[k] = 4;
+          calls_all_snps.push_back(ini_call);
+        }
       }
     }
 
